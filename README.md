@@ -2,6 +2,8 @@
 
 **Work in Progress** · A new iteration of my personal website, built on Next.js 15 + React 19.
 
+**Live at [www.ryanmeyer.dev](https://www.ryanmeyer.dev)**
+
 The successor to my Vite-based v1 ([rpmeyer3/Parrot](https://github.com/rpmeyer3/Parrot)), reimagined with the Next.js App Router, Tailwind v4, and Framer Motion-driven scroll animations.
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
