@@ -1,4 +1,4 @@
-# Macaw — Personal Website (v2)
+# Macaw: Personal Website (v2)
 
 **Work in Progress** · A new iteration of my personal website, built on Next.js 15 + React 19.
 
@@ -14,7 +14,7 @@ The successor to my Vite-based v1 ([rpmeyer3/Parrot](https://github.com/rpmeyer3
 
 ## Highlights
 
-- **Building** a refreshed personal portfolio on the Next.js 15 App Router with React 19 server components and Tailwind CSS v4 — replacing my Vite-based v1 with a more modern, statically-generated stack.
+- **Building** a refreshed personal portfolio on the Next.js 15 App Router with React 19 server components and Tailwind CSS v4, replacing my Vite-based v1 with a more modern, statically-generated stack.
 - **Designed** scroll-driven motion using Framer Motion 11 with Lenis for smooth scrolling, Geist as the primary typeface, and Lucide React for iconography.
 - **Stack:** Next.js 15 · React 19 · TypeScript · Tailwind CSS v4 · Framer Motion · Lenis · Geist · Lucide
 
