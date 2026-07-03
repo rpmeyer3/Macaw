@@ -51,9 +51,9 @@ export const timelineData: TimelineItem[] = [
     id: 3,
     slug: "experience",
     title: "Experience",
-    date: "2024 – Now",
+    date: "2024 – 2026",
     content:
-      "Three Saia LTL Freight stints across two summers and one academic year. ETL, BI, and an end-to-end ML pipeline that cut RFP processing from months to hours.",
+      "Four Saia LTL Freight stints across two summers and two academic years. ETL, BI, an end-to-end ML pipeline that cut RFP processing from months to hours, and internal analytics tooling for pricing and market share.",
     category: "career",
     icon: Briefcase,
     relatedIds: [2, 4],

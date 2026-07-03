@@ -129,6 +129,92 @@ export const skillsContent: SkillGroup[] = [
 
 export const projectsContent: ProjectInfo[] = [
   {
+    name: "Big Box Market Share Map",
+    tagline:
+      "Interactive Leaflet map of Saia's outbound LTL market-share loss by ZIP, built entirely on free open data to replace a paid location feed.",
+    description:
+      "National sales wanted to know exactly where Saia was bleeding outbound LTL share, and the existing answer came from an expensive third-party location subscription. So I rebuilt it from open data. A Python ETL pulls competitor terminals and big-box facilities from OpenStreetMap via Overpass, the All The Places dataset, and the US Census ZCTA gazetteer, reconciles everything to a ZIP-level backbone, runs a defensibility regression, and bakes the result into a single self-contained HTML map. Double-click it and you get every weak ZIP, the opportunity dollars at stake, and the rival carriers and warehouses sitting nearby, with no server and no paid API. It shipped as the flagship study inside a broader internal analytics repo.",
+    period: "2026",
+    tech: [
+      "Python",
+      "Leaflet",
+      "OpenStreetMap",
+      "Overpass API",
+      "US Census",
+      "Pandas",
+      "HTML",
+    ],
+    highlights: [
+      "Replaced a paid location subscription with free open-data sources",
+      "ZIP-level opportunity-dollar sizing across the US",
+      "Defensibility regression on competitor proximity vs. market size",
+      "Single self-contained HTML deliverable, no server required",
+    ],
+    repoPrivate: true,
+  },
+  {
+    name: "LTL Pricing & Yield Analysis",
+    tagline:
+      "Price-realization tracking and GRI vs. surgical pricing-strategy comparison for Saia's Finance and Pricing teams.",
+    description:
+      "Pricing increases look great on paper; the question is how much of each one actually survives into realized revenue. This toolkit answers it. For every logged rate increase it measures the gap between the planned lift and what was realized in revenue and yield after the effective date, computing a realization rate at the lane, terminal, and account level. It then compares strategies head to head: across-the-board general rate increases (GRI) versus surgical lane- and location-level moves, and which better retains business while lifting realized yield, including detection of share- and mix-shift 'business flipping'. Real pricing data stays local by design; source control holds only reproducible analysis scripts and methodology.",
+    period: "2026",
+    tech: ["Python", "Pandas", "NumPy", "PowerShell"],
+    highlights: [
+      "Price-realization rates at lane, terminal, and account level",
+      "GRI vs. surgical strategy comparison",
+      "Business-flipping (share- and mix-shift) detection",
+      "Reproducible analysis scripts with a strict local-only data boundary",
+    ],
+    repoPrivate: true,
+  },
+  {
+    name: "Distribution-Center Finder",
+    tagline:
+      "Give it a US ZIP and it discovers warehouses from OpenStreetMap, matches them to customer accounts by address, and shows an aerial photo of each — no API keys.",
+    description:
+      "A prospecting aid for the accounts team: type in a ZIP code and it surfaces the distribution centers worth a sales call. It discovers warehouse and industrial footprints from OpenStreetMap (Nominatim plus Overpass), geocodes the account list with the free US Census geocoder, matches buildings to customers one-to-one by street address, and pulls a sharp top-down Esri aerial mosaic of each match. Everything runs locally behind a single-file web UI with live progress, pause/resume, and a saved-matches drawer; every external service is free and keyless, and results cache per ZIP so re-runs are near-instant. It also ships as a zipped, double-click distributable for coworkers.",
+    period: "2026",
+    tech: [
+      "Python",
+      "OpenStreetMap",
+      "US Census Geocoder",
+      "Esri Imagery",
+      "Requests",
+      "Pillow",
+      "HTML",
+    ],
+    highlights: [
+      "Keyless pipeline over OpenStreetMap, US Census, and Esri imagery",
+      "1:1 address matching of footprints to customer accounts",
+      "Local single-file web UI with live status and saved matches",
+      "Per-ZIP caching plus a zipped distributable for internal sharing",
+    ],
+    repoPrivate: true,
+  },
+  {
+    name: "RFP Data-Model Pipeline",
+    tagline:
+      "Automated Windows pipeline that scans National Accounts RFP workbooks, fuzzy-matches each to its account, and writes audited shipping-day statistics.",
+    description:
+      "The production successor to my earlier RFP automation work. It scans Excel workbooks off the National Accounts file share, fuzzy-matches each file to the right customer account and RFP identifier with a ranked heuristic, computes shipping-day statistics (unique-day counts, date ranges, most-common dates), and writes audited JSON results. It refreshes its working data at the start of every run so stale numbers never leak forward, keeps timestamped backups, and maintains a fail-twice exclusion list so files that break processing are permanently skipped and later runs stay stable.",
+    period: "2026",
+    tech: [
+      "Python",
+      "Pandas",
+      "openpyxl",
+      "FuzzyWuzzy",
+      "Windows Batch",
+    ],
+    highlights: [
+      "Ranked fuzzy matching of workbooks to accounts and RFPs",
+      "Shipping-day statistics with audited JSON output",
+      "Fresh-refresh each run plus timestamped backups",
+      "Fail-twice exclusion list for stable, repeatable runs",
+    ],
+    repoPrivate: true,
+  },
+  {
     name: "Freshkeep",
     tagline:
       "Mobile receipt-scanning pantry tracker with TF-IDF item matching against 661 USDA FoodKeeper entries.",
@@ -277,6 +363,46 @@ export const projectsContent: ProjectInfo[] = [
 ];
 
 export const experienceContent: ExperienceEntry[] = [
+  {
+    role: "Data Engineering & Analytics Intern",
+    org: "Saia LTL Freight",
+    location: "Johns Creek, GA",
+    period: "Aug. 2025 to July 2026",
+    description:
+      "Built internal analytics and automation tooling for the National Accounts and Pricing teams, spanning market-share mapping, pricing-realization analysis, distribution-center discovery, and a production RFP pipeline.",
+    bullets: [
+      "Built an interactive market-share map (Leaflet + Python ETL) pinpointing where Saia loses outbound LTL share by ZIP code, replacing a paid location-data subscription with free open sources (OpenStreetMap/Overpass, All The Places, US Census) and quantifying opportunity dollars per ZIP.",
+      "Developed an LTL pricing and yield-analysis toolkit measuring price realization (planned vs. realized rate increases at lane, terminal, and account level) and comparing across-the-board (GRI) versus surgical pricing strategies, including share-shift business-flipping detection.",
+      "Created a keyless Distribution-Center Finder that discovers warehouse footprints from OpenStreetMap, matches them one-to-one to customer accounts by street address via the US Census geocoder, and renders Esri aerial imagery in a local web UI for opportunity sizing.",
+      "Automated a Windows production pipeline that scans National Accounts RFP workbooks, fuzzy-matches each to its account and RFP identifier, computes shipping-day statistics, and writes audited JSON with a fail-twice exclusion list for stable reruns.",
+    ],
+    repos: [
+      {
+        name: "Roadrunner",
+        description:
+          "Internal Saia analytics repo; flagship study maps Saia's outbound LTL market-share loss by ZIP using free open data (OpenStreetMap, All The Places, US Census) in place of a paid location feed.",
+        isPrivate: true,
+      },
+      {
+        name: "Iguana",
+        description:
+          "LTL pricing and yield analysis: price-realization tracking (planned vs. realized rate increases) and GRI vs. surgical strategy comparison with business-flipping detection.",
+        isPrivate: true,
+      },
+      {
+        name: "Hawk",
+        description:
+          "Distribution-Center Finder: discovers warehouse footprints from OpenStreetMap, matches them to customer accounts by address, and pulls Esri aerial imagery in a keyless local web UI.",
+        isPrivate: true,
+      },
+      {
+        name: "Lynx",
+        description:
+          "Production RFP data-model pipeline: scans National Accounts workbooks, fuzzy-matches each to its account and RFP, computes shipping-day statistics, and writes audited JSON.",
+        isPrivate: true,
+      },
+    ],
+  },
   {
     role: "Data Engineering Intern",
     org: "Saia LTL Freight",
