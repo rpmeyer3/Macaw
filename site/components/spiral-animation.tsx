@@ -349,6 +349,10 @@ class Star {
   private dx: number;
   private dy: number;
   private spiralLocation: number;
+  // spiralPath is pure in p and spiralLocation never changes, so the star's
+  // anchor point is computed once instead of re-deriving ease/sqrt/trig for
+  // all 3000 stars every frame.
+  private spiralPos: Vector2D | null = null;
   private strokeWeightFactor: number;
   private z: number;
   private angle: number;
@@ -376,26 +380,14 @@ class Star {
   }
 
   render(p: number, controller: AnimationController) {
-    const spiralPos = controller.spiralPath(this.spiralLocation);
     const q = p - this.spiralLocation;
 
     if (q > 0) {
-      const displacementProgress = controller.constrain(4 * q, 0, 1);
-
-      const linearEasing = displacementProgress;
-      const elasticEasing = controller.easeOutElastic(displacementProgress);
-      const powerEasing = Math.pow(displacementProgress, 2);
-
-      let easing: number;
-      if (displacementProgress < 0.3) {
-        easing = controller.lerp(linearEasing, powerEasing, displacementProgress / 0.3);
-      } else if (displacementProgress < 0.7) {
-        const t = (displacementProgress - 0.3) / 0.4;
-        easing = controller.lerp(powerEasing, elasticEasing, t);
-      } else {
-        easing = elasticEasing;
+      if (this.spiralPos === null) {
+        this.spiralPos = controller.spiralPath(this.spiralLocation);
       }
-      void easing;
+      const spiralPos = this.spiralPos;
+      const displacementProgress = controller.constrain(4 * q, 0, 1);
 
       let screenX: number;
       let screenY: number;
@@ -491,12 +483,23 @@ export function SpiralAnimation({
   }, [paused]);
 
   useEffect(() => {
-    const handleResize = () => {
+    const measure = () => {
       setDimensions({ width: window.innerWidth, height: window.innerHeight });
     };
-    handleResize();
+    measure();
+    // Debounced: a live resize fires dozens of events, and each dimensions
+    // change tears down and rebuilds the whole animation (3000 stars +
+    // timeline). Rebuild once, after the drag settles.
+    let t: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(t);
+      t = setTimeout(measure, 200);
+    };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {

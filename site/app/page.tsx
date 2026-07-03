@@ -359,6 +359,7 @@ export default function Page() {
                   initialPhi={LANDING_PHI}
                   targetPhi={target?.phi}
                   targetTheta={target?.theta}
+                  paused={phase === "white"}
                 />
 
                 <AnimatePresence>

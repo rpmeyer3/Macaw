@@ -37,6 +37,9 @@ interface GlobeProps {
   initialPhi?: number;
   targetPhi?: number;
   targetTheta?: number;
+  // When true, skip WebGL rendering entirely — use while the globe is
+  // fully hidden behind an opaque layer (e.g. the white phase).
+  paused?: boolean;
 }
 
 const DEFAULT_MARKERS: Marker[] = [];
@@ -67,6 +70,7 @@ export function Globe({
   initialPhi = 0,
   targetPhi,
   targetTheta,
+  paused = false,
 }: GlobeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerInteracting = useRef<{ x: number; y: number } | null>(null);
@@ -76,6 +80,7 @@ export function Globe({
   const phiOffsetRef = useRef(0);
   const thetaOffsetRef = useRef(0);
   const isPausedRef = useRef(false);
+  const hiddenRef = useRef(paused);
   const phiRef = useRef(initialPhi);
   const speedRef = useRef(speed);
   const targetPhiRef = useRef<number | undefined>(targetPhi);
@@ -97,6 +102,10 @@ export function Globe({
   useEffect(() => {
     speedRef.current = speed;
   }, [speed]);
+
+  useEffect(() => {
+    hiddenRef.current = paused;
+  }, [paused]);
 
   useEffect(() => {
     targetPhiRef.current = targetPhi;
@@ -209,6 +218,12 @@ export function Globe({
       } as Parameters<typeof createGlobe>[1]);
 
       function animate() {
+        // Fully hidden (opaque overlay above): keep the loop alive but skip
+        // rotation math and the WebGL draw.
+        if (hiddenRef.current) {
+          animationId = requestAnimationFrame(animate);
+          return;
+        }
         if (!isPausedRef.current) {
           if (targetPhiRef.current !== undefined) {
             const TAU = Math.PI * 2;
