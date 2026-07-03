@@ -6,7 +6,18 @@ export interface ProjectInfo {
   tech: string[];
   highlights: string[];
   repo?: string;
+  // Repo exists but is private — render a "private repo" note instead of a link.
+  repoPrivate?: boolean;
   live?: string;
+  // Card image under public/, e.g. "/projects/filmhub.png".
+  image?: string;
+}
+
+export interface RepoRef {
+  name: string;
+  description: string;
+  url?: string;
+  isPrivate?: boolean;
 }
 
 export interface ExperienceEntry {
@@ -16,6 +27,8 @@ export interface ExperienceEntry {
   period: string;
   description: string;
   bullets?: string[];
+  // Repos produced during this role. Private ones get a badge, no link.
+  repos?: RepoRef[];
 }
 
 export interface EducationEntry {
@@ -120,7 +133,7 @@ export const projectsContent: ProjectInfo[] = [
     tagline:
       "Mobile receipt-scanning pantry tracker with TF-IDF item matching against 661 USDA FoodKeeper entries.",
     description:
-      "React Native (Expo) mobile app that scans grocery receipts via OCR, fuzzy-matches each line item against 661 USDA FoodKeeper entries using TF-IDF, and tracks expiration dates with push reminders. The FastAPI backend on Supabase handles RLS plus JWT auth, household sharing across multiple users, and waste-tracking analytics.",
+      "Freshkeep started with a familiar ritual: buy groceries with the best intentions, then find half of them liquefying in the crisper two weeks later. So I built the app I wished existed. You scan the receipt on the way in from the car, OCR pulls every line item, and a TF-IDF matcher pairs each one against 661 USDA FoodKeeper entries to learn how long it actually lasts. The app quietly counts down and nudges you before anything turns. Behind it sits a FastAPI backend on Supabase with row-level security and JWT auth, so a whole household can share one pantry, plus a dashboard that shows you what you keep throwing away.",
     period: "Spring 2026",
     tech: [
       "React Native",
@@ -137,13 +150,14 @@ export const projectsContent: ProjectInfo[] = [
       "Household sharing with Supabase RLS plus JWT auth",
       "Waste-tracking analytics dashboard",
     ],
+    repoPrivate: true,
   },
   {
     name: "Byte's Bank",
     tagline:
       "PDF bank-statement analyzer with TF-IDF + Naive Bayes categorization and a Gemini-powered financial advisor chat.",
     description:
-      "Full-stack app that parses PDF bank statements, classifies each transaction through a TF-IDF and Naive Bayes pipeline, then delivers AI-generated financial advice through a Gemini-powered chat interface. Wizard-rank gamification and ElevenLabs TTS voice summaries on top.",
+      "Built in a weekend at UGA Hacks 11, on a simple premise: what if your bank statement could talk back? Drop in the PDF and pdfplumber pries the transactions loose, a TF-IDF and Naive Bayes pipeline sorts them into ten spending categories, and a Gemini-powered advisor reads the result and tells you, kindly, where the money went. Climb wizard ranks as your habits improve, or let ElevenLabs read your monthly summary out loud.",
     period: "Spring 2026",
     tech: [
       "React",
@@ -164,13 +178,14 @@ export const projectsContent: ProjectInfo[] = [
     ],
     repo: "https://github.com/rpmeyer3/Goose",
     live: "https://byte-bank-mauve.vercel.app",
+    image: "/projects/bytes-bank.png",
   },
   {
     name: "Noise-Robust Image Segmentation System",
     tagline:
       "31.5M-parameter Attention U-Net with CBAM and curriculum learning, 92.6% accuracy across 5 noise types.",
     description:
-      "A 31.5 million parameter Attention U-Net with CBAM and a curriculum-learning training schedule that hits 92.6% accuracy across five noise types. Deployed via containerized FastAPI with Hugging Face model delivery and a Vercel visualization dashboard rendering confidence-heatmap overlays.",
+      "Most segmentation models are lab kids: show them a clean image and they shine, add sensor grain or motion blur and they fall apart. I wanted one that kept its footing in the mess. The result is a 31.5 million parameter Attention U-Net with CBAM, trained on a curriculum that ramps the corruption up as the model gets stronger, the way you would add weight to a barbell. It holds 92.6% accuracy across five distinct noise types. The whole thing ships as a containerized FastAPI service with models delivered from Hugging Face, and a Vercel dashboard renders confidence heatmaps so you can watch it decide.",
     period: "Fall 2025",
     tech: [
       "PyTorch",
@@ -190,13 +205,14 @@ export const projectsContent: ProjectInfo[] = [
     ],
     repo: "https://github.com/rpmeyer3/Recognize",
     live: "https://pattern-delineation.vercel.app",
+    image: "/projects/segmentation.png",
   },
   {
     name: "Filmhub",
     tagline:
       "Production-ready movie booking SPA with Docker CI/CD, OAuth + JWT auth, and Luhn-validated payments.",
     description:
-      "Full-stack movie booking single-page app with a Next.js / React frontend and a Django REST API backend, all containerized with Docker CI/CD. Implements OAuth 2.0 / JWT auth, role-based access control, database triggers for user sync, and Luhn-validated payment integration. CSCI 4050 group project at UGA.",
+      "The CSCI 4050 group project at UGA: build a movie booking site that could plausibly go to production, and then actually treat it that way. Next.js and React up front, a Django REST API behind, everything containerized with a Docker CI/CD pipeline. OAuth 2.0 and JWT handle sign-in, role-based access keeps customers and admins in their own lanes, database triggers keep the auth and profile tables honest, and payments pass Luhn validation before anything gets charged.",
     period: "Spring 2025",
     tech: [
       "Next.js",
@@ -216,13 +232,14 @@ export const projectsContent: ProjectInfo[] = [
     ],
     repo: "https://github.com/rpmeyer3/Filmhub",
     live: "https://film-hub-theta.vercel.app",
+    image: "/projects/filmhub.png",
   },
   {
     name: "Azure 3-Tier Secure Architecture",
     tagline:
       "Production-grade Azure web infra with Terraform, security hardening, and an interactive React explorer.",
     description:
-      "Three-tier web architecture on Azure with security baked in from the baseline up: deny-all NSG defaults, private endpoints eliminating public data-tier exposure, Entra ID auth with Managed Identities, and TLS 1.2+ enforced everywhere. Terraform 1.5+ on AzureRM 4.x. A separate React explorer lets reviewers walk the architecture without needing an Azure subscription.",
+      "Cloud tutorials love to end with a disclaimer: never do this in production. This project starts where those leave off. It is a three-tier web architecture on Azure where security is the baseline rather than the epilogue: NSGs default to deny-all, private endpoints keep the data tier off the public internet entirely, Entra ID and Managed Identities handle auth, and TLS 1.2+ is enforced everywhere, all expressed in Terraform 1.5+ on AzureRM 4.x. And because most reviewers do not have an Azure subscription lying around, a separate React explorer lets you walk the whole architecture from a browser tab.",
     tech: [
       "Terraform",
       "Azure",
@@ -238,13 +255,15 @@ export const projectsContent: ProjectInfo[] = [
       "Interactive React architecture explorer with no subscription required",
     ],
     repo: "https://github.com/rpmeyer3/Mule",
+    live: "https://three-tier-web-arch.vercel.app",
+    image: "/projects/azure-3tier.png",
   },
   {
     name: "AI-PIP",
     tagline:
       "Serverless AI inference pipeline on Azure with Terraform IaC and an animated React frontend.",
     description:
-      "End-to-end serverless AI inference pipeline deployed on Azure with reusable Terraform modules. The Vite + React 19 + TypeScript frontend uses GSAP to visualize the pipeline workflow, and the modular IaC keeps the cloud side reproducible across environments.",
+      "An end-to-end serverless AI inference pipeline on Azure, with the infrastructure written as reusable Terraform modules so the entire environment can be torn down and rebuilt on demand. The front half is a Vite, React 19, and TypeScript app that uses GSAP to animate the pipeline itself: instead of reading about requests moving through the system, you watch them travel.",
     tech: ["Azure", "Terraform", "React 19", "Vite", "TypeScript", "GSAP"],
     highlights: [
       "Modular Terraform with reusable Azure components",
@@ -253,6 +272,7 @@ export const projectsContent: ProjectInfo[] = [
     ],
     repo: "https://github.com/rpmeyer3/Messina",
     live: "https://ai-pip.vercel.app",
+    image: "/projects/ai-pip.png",
   },
 ];
 
@@ -270,6 +290,26 @@ export const experienceContent: ExperienceEntry[] = [
       "Built a recursive data-generation pipeline using a score-based search across live pricing servers, including a script to produce synthetic training examples for model convergence.",
       "Implemented a robust data-validation module using Pandas and strict schema enforcement, preventing downstream corruption in CRM systems by rejecting malformed records at ingestion.",
       "Re-engineered a legacy C# process to fully integrate the new ML pipeline with enterprise CRMs (Salesforce and Microsoft Dynamics), giving sales teams validated near real-time RFP data.",
+    ],
+    repos: [
+      {
+        name: "Penguin",
+        description:
+          "The RFP pipeline itself: an automated scanner that fuzzy-matches 45K+ file paths against CRM accounts to extract proposal data.",
+        isPrivate: true,
+      },
+      {
+        name: "Heron",
+        description:
+          "Production model for National Accounts RFP data mining. Catalogs the file share and learns file-path patterns to automate account lookups.",
+        isPrivate: true,
+      },
+      {
+        name: "Mongoose",
+        description:
+          "Dynamic reference updater: filters RFP file paths down to data workbooks and matches each to a customer account using fuzzy matching plus sentence-embedding similarity.",
+        isPrivate: true,
+      },
     ],
   },
   {
@@ -296,6 +336,14 @@ export const experienceContent: ExperienceEntry[] = [
       "Optimized BI semantic models by authoring complex DAX and SQL queries to calculate critical business metrics (ADR, ADBC), improving underlying report-query performance by over 30%.",
       "Spearheaded development of an interactive Territory Insights dashboard using Azure Maps in Power BI, identifying growth markets projected to capture over $5M in potential revenue.",
       "Implemented a dynamic Row-Level Security model for Power BI reports embedded within a Visualforce IFrame, enabling personalized and secure dashboard access for over 500 end users.",
+    ],
+    repos: [
+      {
+        name: "Osprey",
+        description:
+          "Saia Performance Insights: the Power BI model and report, augmented with SEC EDGAR competitor financial data for benchmarking.",
+        isPrivate: true,
+      },
     ],
   },
 ];

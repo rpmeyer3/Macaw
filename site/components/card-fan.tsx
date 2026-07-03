@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import type { TimelineItem } from "@/lib/timeline-data";
+import { SECTION_THEMES } from "@/lib/section-themes";
 
 interface CardFanProps {
   items: TimelineItem[];
@@ -67,12 +70,21 @@ function getSlotConfig(totalCards: number, slot: number) {
 const ARROW_CLASSES =
   "relative flex items-center justify-center rounded-full border-[1.5px] border-white/10 bg-white/5 backdrop-blur-[16px] text-white/55 cursor-pointer shrink-0 z-30 outline-none shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:border-white/25 hover:text-white/80 active:opacity-70 transition-colors duration-300 before:content-[''] before:absolute before:inset-[3px] before:rounded-full before:border before:border-white/[0.04] before:pointer-events-none";
 
+interface ExpandState {
+  slug: string;
+  rect: { left: number; top: number; width: number; height: number };
+}
+
 export default function CardFan({ items }: CardFanProps) {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const isAnimating = useRef(false);
   const hasEntered = useRef(false);
   const directionRef = useRef<"left" | "right" | null>(null);
   const prevVisible = useRef<Set<number>>(new Set());
+  const expandingRef = useRef(false);
+  const expandRef = useRef<HTMLDivElement>(null);
+  const [expand, setExpand] = useState<ExpandState | null>(null);
 
   const totalCards = items.length;
   const needsPagination = totalCards > MAX_VISIBLE;
@@ -366,6 +378,41 @@ export default function CardFan({ items }: CardFanProps) {
     };
   }, [centerIndex, totalCards, getVisibleMap, needsPagination]);
 
+  // Shared-element transition: the clicked card's photo grows to fill the
+  // viewport, then we navigate — the destination page uses the same image
+  // as its background, so the cut is invisible.
+  const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>, slug: string) => {
+    if (!SECTION_THEMES[slug]) return; // no photo — plain navigation
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    e.preventDefault();
+    if (expandingRef.current) return;
+    expandingRef.current = true;
+    // AABB of the (possibly rotated) card — exact for the center card,
+    // close enough for outer ones; the grow motion masks the difference.
+    const r = e.currentTarget.getBoundingClientRect();
+    setExpand({
+      slug,
+      rect: { left: r.left, top: r.top, width: r.width, height: r.height },
+    });
+  };
+
+  useEffect(() => {
+    if (!expand || !expandRef.current) return;
+    const tween = gsap.to(expandRef.current, {
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      borderRadius: 0,
+      duration: 0.65,
+      ease: "power3.inOut",
+      onComplete: () => router.push(`/hub/${expand.slug}`),
+    });
+    return () => {
+      tween.kill();
+    };
+  }, [expand, router]);
+
   if (!totalCards) return null;
 
   const chevron = (direction: "left" | "right") => (
@@ -398,38 +445,45 @@ export default function CardFan({ items }: CardFanProps) {
         >
           {items.map((item, index) => {
             const Icon = item.icon;
+            const theme = SECTION_THEMES[item.slug];
             const alignEnd = !needsPagination && index > centerOfFan;
             return (
               <Link
                 key={item.id}
                 href={`/hub/${item.slug}`}
+                onClick={(e) => handleCardClick(e, item.slug)}
                 className="fan-card group block cursor-pointer outline-none"
                 aria-label={`${item.title} — ${item.content}`}
               >
                 <article
-                  className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#0b0b10] shadow-[0_12px_40px_rgba(0,0,0,0.55)] transition-colors duration-300 group-hover:border-white/45 group-focus-visible:border-white p-5 md:p-6 ${
+                  className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#0b0b10] shadow-[0_12px_40px_rgba(0,0,0,0.55)] transition-colors duration-300 group-hover:border-white/45 group-focus-visible:border-white p-4 md:p-5 ${
                     alignEnd ? "items-end text-right" : "items-start"
                   }`}
                 >
+                  {theme && (
+                    <Image
+                      src={theme.image}
+                      alt=""
+                      fill
+                      unoptimized
+                      draggable={false}
+                      sizes="16rem"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_0%,rgba(255,255,255,0.08),rgba(255,255,255,0)_60%)]"
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/15"
                   />
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/40 bg-black text-white transition-colors duration-300 group-hover:bg-white group-hover:text-black">
+                  <div className="relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/50 bg-black/45 text-white backdrop-blur-sm transition-colors duration-300 group-hover:bg-white group-hover:text-black">
                     <Icon size={16} />
                   </div>
-                  <h2 className="mt-4 font-mono text-base md:text-lg font-semibold uppercase tracking-[0.08em] text-white">
+                  <h2 className="relative mt-auto font-mono text-base md:text-lg font-semibold uppercase tracking-[0.08em] text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
                     {item.title}
                   </h2>
-                  <p className="mt-1 font-mono text-[10px] md:text-[11px] uppercase tracking-[0.12em] text-white/45">
+                  <p className="relative mt-1 font-mono text-[10px] md:text-[11px] uppercase tracking-[0.12em] text-white/60">
                     {item.date}
                   </p>
-                  <p className="mt-3 hidden sm:line-clamp-4 text-xs md:text-sm leading-relaxed text-white/65">
-                    {item.content}
-                  </p>
-                  <span className="mt-auto pt-3 font-mono text-[10px] md:text-[11px] uppercase tracking-[0.12em] text-white/50 transition-colors duration-300 group-hover:text-white">
-                    open <span aria-hidden>→</span>
-                  </span>
                 </article>
               </Link>
             );
@@ -465,6 +519,30 @@ export default function CardFan({ items }: CardFanProps) {
           >
             {chevron("right")}
           </button>
+        </div>
+      )}
+
+      {expand && (
+        <div className="fixed inset-0 z-[100] pointer-events-none">
+          <div
+            ref={expandRef}
+            className="absolute overflow-hidden rounded-2xl"
+            style={{
+              left: expand.rect.left,
+              top: expand.rect.top,
+              width: expand.rect.width,
+              height: expand.rect.height,
+            }}
+          >
+            <Image
+              src={SECTION_THEMES[expand.slug].image}
+              alt=""
+              fill
+              unoptimized
+              sizes="100vw"
+              className="object-cover"
+            />
+          </div>
         </div>
       )}
     </section>
