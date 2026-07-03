@@ -2,21 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { TextMarquee } from "@/components/text-marquee";
+import { AnimatedShinyText } from "@/components/animated-shiny-text";
 import { Globe } from "@/components/globe";
 import { SpiralAnimation } from "@/components/spiral-animation";
 import { TextScramble } from "@/components/text-scramble";
 import { BackgroundPaths } from "@/components/background-paths";
 import { useIsMobile } from "@/lib/use-is-mobile";
 
-const ROLES = [
-  "Software Engineer",
-  "Full-Stack Developer",
-  "ML Engineer",
-  "Data Engineer",
-  "Cloud Engineer",
-  "AI Engineer",
-];
+const TITLE = "Software Engineer";
 
 const ATLANTA = {
   id: "atlanta",
@@ -293,32 +286,29 @@ export default function Page() {
           {phase === "marquee" && (
             <motion.div
               key="marquee"
-              className="absolute inset-0 flex items-center justify-center px-6"
+              className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center md:gap-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.6 }}
             >
-              {isMobile ? (
-                <span className="text-4xl font-bold tracking-tight">
-                  Ryan Meyer
-                </span>
-              ) : (
-                <TextMarquee
-                  speed={1.2}
-                  className="text-3xl md:text-4xl font-bold tracking-tight"
-                  prefix={
-                    <span>
-                      Ryan Meyer
-                      <span className="mx-3 text-white/40 font-light">|</span>
-                    </span>
-                  }
-                >
-                  {ROLES.map((role) => (
-                    <span key={role}>{role}</span>
-                  ))}
-                </TextMarquee>
-              )}
+              <motion.span
+                className="text-4xl font-bold tracking-tight md:text-6xl"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              >
+                Ryan Meyer
+              </motion.span>
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.25, ease: "easeOut" }}
+              >
+                <AnimatedShinyText className="text-base font-medium uppercase tracking-[0.32em] md:text-xl md:tracking-[0.4em]">
+                  {TITLE}
+                </AnimatedShinyText>
+              </motion.div>
             </motion.div>
           )}
 

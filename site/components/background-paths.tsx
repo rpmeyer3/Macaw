@@ -8,11 +8,16 @@ import { TextScramble } from "@/components/text-scramble";
 function FloatingPaths({ position }: { position: number }) {
   const paths = Array.from({ length: 36 }, (_, i) => ({
     id: i,
+    // Two cubic segments. The second segment's first control point
+    // (`616 - i * 15 * position`) is the reflection of the first segment's
+    // last control point about the join at (152 - dx, 343 - dy), i.e. dx is
+    // tripled so the incoming and outgoing tangents match exactly. That C1
+    // continuity turns the old kink into one cohesive, uninterrupted bend.
     d: `M-${380 - i * 5 * position} -${189 + i * 6}C-${
       380 - i * 5 * position
     } -${189 + i * 6} -${312 - i * 5 * position} ${216 - i * 6} ${
       152 - i * 5 * position
-    } ${343 - i * 6}C${616 - i * 5 * position} ${470 - i * 6} ${
+    } ${343 - i * 6}C${616 - i * 15 * position} ${470 - i * 6} ${
       684 - i * 5 * position
     } ${875 - i * 6} ${684 - i * 5 * position} ${875 - i * 6}`,
     width: 0.5 + i * 0.03,
@@ -40,8 +45,9 @@ function FloatingPaths({ position }: { position: number }) {
               // drift with no per-frame JS. The old framer version snapped
               // pathLength from 1 back to 0.3 on every repeat and ran all
               // 72 paths in phase. Deterministic values keep SSR and client
-              // markup identical.
-              animationDuration: `${20 + ((path.id * 7) % 10)}s`,
+              // markup identical. Durations are kept short (10-17s) so the
+              // drift is clearly moving rather than appearing frozen.
+              animationDuration: `${10 + ((path.id * 7) % 8)}s`,
               animationDelay: `${-(path.id * 1.7)}s`,
             }}
           />

@@ -56,11 +56,13 @@
 
 /* Background lines (void scene). pathLength=1 is set on each <path>, so the
    dash period is exactly 1 — animating dashoffset 1 -> 0 loops seamlessly.
-   Per-path negative animation-delay desynchronizes the phases so the field
-   never pulses in unison. */
+   The 0.6/0.4 dash sends a visible 60%-long segment sliding along each curve
+   (a clear "flowing" beam rather than a barely-moving full line), and the
+   per-path negative animation-delay desynchronizes the phases so the field
+   never pulses in unison or looks frozen. */
 .floating-path {
-  stroke-dasharray: 0.75 0.25;
-  animation: floating-path-drift 24s linear infinite;
+  stroke-dasharray: 0.6 0.4;
+  animation: floating-path-drift 14s linear infinite;
 }
 @keyframes floating-path-drift {
   0% {
@@ -77,6 +79,30 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .floating-path {
+    animation: none;
+  }
+}
+
+/* Animated Shiny Text (magicui, via 21st.dev). A glare band the width of
+   --shiny-width pans across the text; the long dwell at each end keeps the
+   shimmer subtle rather than a constant sweep. Paired with bg-clip-text on
+   the element itself. */
+.animate-shiny-text {
+  animation: shiny-text 8s infinite;
+}
+@keyframes shiny-text {
+  0%,
+  90%,
+  100% {
+    background-position: calc(-100% - var(--shiny-width)) 0;
+  }
+  30%,
+  60% {
+    background-position: calc(100% + var(--shiny-width)) 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-shiny-text {
     animation: none;
   }
 }
