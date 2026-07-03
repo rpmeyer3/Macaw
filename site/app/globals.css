@@ -1,1 +1,82 @@
 @import "tailwindcss";
+
+/* Card fan (hub). Heights must stay in sync with getHeightMultiplier()
+   breakpoints in components/card-fan.tsx. Cards start transparent — gsap
+   owns opacity from first tick, this only prevents a pre-JS flash of the
+   unstacked pile. */
+.fan-layout {
+  height: 38rem;
+}
+.fan-card {
+  position: absolute;
+  width: 16rem;
+  height: 23rem;
+  /* visibility keeps pre-JS and gsap-hidden cards out of the tab order;
+     gsap autoAlpha manages both properties from there */
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform;
+}
+@media (max-width: 1023px) {
+  .fan-layout {
+    height: 34rem;
+  }
+  .fan-card {
+    width: 13.5rem;
+    height: 19.5rem;
+  }
+}
+@media (max-width: 767px) {
+  .fan-layout {
+    height: 28rem;
+  }
+  .fan-card {
+    width: 11.5rem;
+    height: 16.5rem;
+  }
+}
+@media (max-width: 639px) {
+  .fan-layout {
+    height: 26rem;
+  }
+  .fan-card {
+    width: 10.5rem;
+    height: 15rem;
+  }
+}
+@media (max-width: 479px) {
+  .fan-layout {
+    height: 22rem;
+  }
+  .fan-card {
+    width: 9.5rem;
+    height: 13.5rem;
+  }
+}
+
+/* Background lines (void scene). pathLength=1 is set on each <path>, so the
+   dash period is exactly 1 — animating dashoffset 1 -> 0 loops seamlessly.
+   Per-path negative animation-delay desynchronizes the phases so the field
+   never pulses in unison. */
+.floating-path {
+  stroke-dasharray: 0.75 0.25;
+  animation: floating-path-drift 24s linear infinite;
+}
+@keyframes floating-path-drift {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floating-path {
+    animation: none;
+  }
+}

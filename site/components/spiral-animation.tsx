@@ -317,6 +317,17 @@ class AnimationController {
     }
   }
 
+  // Jump straight to the finished-forward state (idle starfield) without
+  // replaying the intro or firing onComplete — used when a resize rebuilds
+  // the controller after the spiral already finished.
+  public skipToComplete() {
+    this.timeline.kill();
+    this.time = 1;
+    this.postComplete = true;
+    this.render();
+    this.startPostCompleteLoop();
+  }
+
   public reverse(duration: number, onReverseComplete?: () => void) {
     if (this.postCompleteRafId !== null) {
       cancelAnimationFrame(this.postCompleteRafId);
@@ -457,6 +468,12 @@ export function SpiralAnimation({
   const onCompleteRef = useRef(onComplete);
   const onReverseCompleteRef = useRef(onReverseComplete);
   const reverseDurationRef = useRef(reverseDuration ?? duration);
+  // Live phase state, so a debounced-resize rebuild can adopt it instead of
+  // replaying the intro (which would also re-fire onComplete and yank the
+  // page back a phase).
+  const completedRef = useRef(false);
+  const reverseRef = useRef(reverse);
+  const pausedRef = useRef(paused);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -471,6 +488,7 @@ export function SpiralAnimation({
   }, [reverseDuration, duration]);
 
   useEffect(() => {
+    reverseRef.current = reverse;
     if (!reverse) return;
     animationRef.current?.reverse(
       reverseDurationRef.current,
@@ -479,6 +497,7 @@ export function SpiralAnimation({
   }, [reverse]);
 
   useEffect(() => {
+    pausedRef.current = paused;
     animationRef.current?.setPaused(paused);
   }, [paused]);
 
@@ -524,13 +543,32 @@ export function SpiralAnimation({
     canvas.style.height = `${dimensions.height}px`;
     ctx.scale(dpr, dpr);
 
-    animationRef.current = new AnimationController(
+    const controller = new AnimationController(
       ctx,
       dimensions.width,
       dimensions.height,
       duration,
-      () => onCompleteRef.current?.(),
+      () => {
+        completedRef.current = true;
+        onCompleteRef.current?.();
+      },
     );
+    animationRef.current = controller;
+
+    // A rebuild (debounced resize) must adopt the live phase state: a fresh
+    // controller otherwise replays the intro from zero and re-fires
+    // onComplete 5s later — during the white phase that yanked the page
+    // back to the globe scene.
+    if (reverseRef.current) {
+      controller.skipToComplete();
+      controller.reverse(
+        reverseDurationRef.current,
+        () => onReverseCompleteRef.current?.(),
+      );
+    } else if (completedRef.current) {
+      controller.skipToComplete();
+    }
+    if (pausedRef.current) controller.setPaused(true);
 
     return () => {
       animationRef.current?.destroy();

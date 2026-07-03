@@ -27,25 +27,22 @@ function FloatingPaths({ position }: { position: number }) {
       >
         <title>Background Paths</title>
         {paths.map((path) => (
-          <motion.path
+          <path
             key={path.id}
             d={path.d}
             stroke="currentColor"
             strokeWidth={path.width}
             strokeOpacity={0.1 + path.id * 0.03}
-            initial={{ pathLength: 0.3, opacity: 0.6 }}
-            animate={{
-              pathLength: 1,
-              opacity: [0.3, 0.6, 0.3],
-              pathOffset: [0, 1, 0],
-            }}
-            transition={{
-              // Deterministic per-path duration so SSR and client render
-              // identically. (Was Math.random() — caused hydration mismatch
-              // because server and client picked different values.)
-              duration: 20 + ((path.id * 7) % 10),
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "linear",
+            pathLength={1}
+            className="floating-path"
+            style={{
+              // CSS animation (keyframes in globals.css): seamless dash
+              // drift with no per-frame JS. The old framer version snapped
+              // pathLength from 1 back to 0.3 on every repeat and ran all
+              // 72 paths in phase. Deterministic values keep SSR and client
+              // markup identical.
+              animationDuration: `${20 + ((path.id * 7) % 10)}s`,
+              animationDelay: `${-(path.id * 1.7)}s`,
             }}
           />
         ))}
