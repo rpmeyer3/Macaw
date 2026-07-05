@@ -11,6 +11,7 @@ import {
 } from "@/lib/node-content";
 import { SECTION_THEMES } from "@/lib/section-themes";
 import { TitleSparkles } from "@/components/sparkles";
+import { MermaidDiagram } from "@/components/mermaid-diagram";
 
 export type NodeSlug =
   | "about"
@@ -273,6 +274,15 @@ function ProjectsOverlay({ accent }: { accent: string }) {
                   </li>
                 ))}
               </ul>
+            )}
+
+            {p.diagram && (
+              <>
+                <p className="mt-8 text-xs font-mono uppercase tracking-[0.08em] text-white/40">
+                  how it works
+                </p>
+                <MermaidDiagram chart={p.diagram} accent={accent} />
+              </>
             )}
 
             <div className="mt-6 flex flex-wrap gap-2">

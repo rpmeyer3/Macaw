@@ -104,15 +104,6 @@ export default function Page() {
     return () => clearTimeout(t);
   }, []);
 
-  // The intro is a 28x full-viewport zoom into a white flash — a vestibular
-  // trigger (WCAG 2.3.3). Reduced-motion visitors skip straight to the void.
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      skippingRef.current = true;
-      setPhase("void");
-    }
-  }, []);
-
   useEffect(() => {
     if (phase !== "marquee") return;
     const advance = () => {

@@ -11,6 +11,9 @@ export interface ProjectInfo {
   live?: string;
   // Card image under public/, e.g. "/projects/filmhub.png".
   image?: string;
+  // Mermaid source outlining how the project works. Rendered client-side in
+  // the project overlay and mirrored into the repo README as a mermaid block.
+  diagram?: string;
 }
 
 export interface RepoRef {
@@ -152,6 +155,14 @@ export const projectsContent: ProjectInfo[] = [
     ],
     repoPrivate: true,
     image: "/projects/market-share-map.png",
+    diagram: `flowchart TD
+    OSM["OpenStreetMap / Overpass"] --> ETL["Python ETL"]
+    ATP["All The Places"] --> ETL
+    CEN["US Census ZCTA gazetteer"] --> ETL
+    ETL --> ZIP["ZIP-level backbone"]
+    ZIP --> REG["Defensibility regression"]
+    REG --> MAP["Self-contained Leaflet HTML map"]
+    MAP --> OUT["Weak ZIPs, opportunity dollars, nearby rivals"]`,
   },
   {
     name: "LTL Pricing & Yield Analysis",
@@ -169,6 +180,13 @@ export const projectsContent: ProjectInfo[] = [
     ],
     repoPrivate: true,
     image: "/projects/pricing-yield.png",
+    diagram: `flowchart TD
+    RI["Logged rate increases"] --> CALC["Realization engine"]
+    REV["Realized revenue and yield"] --> CALC
+    CALC --> RATE["Realization rate: lane / terminal / account"]
+    RATE --> CMP["GRI vs. surgical comparison"]
+    CMP --> FLIP["Business-flipping detection"]
+    FLIP --> REP["Strategy report"]`,
   },
   {
     name: "Distribution-Center Finder",
@@ -194,6 +212,14 @@ export const projectsContent: ProjectInfo[] = [
     ],
     repoPrivate: true,
     image: "/projects/dc-finder.png",
+    diagram: `flowchart TD
+    ZIP["US ZIP input"] --> OSM["OSM Nominatim + Overpass"]
+    OSM --> WH["Warehouse footprints"]
+    ACC["Customer accounts"] --> GEO["US Census geocoder"]
+    WH --> MATCH["1:1 address match"]
+    GEO --> MATCH
+    MATCH --> AERIAL["Esri aerial mosaic"]
+    AERIAL --> UI["Local web UI: live progress, saved matches"]`,
   },
   {
     name: "RFP Data-Model Pipeline",
@@ -217,6 +243,13 @@ export const projectsContent: ProjectInfo[] = [
     ],
     repoPrivate: true,
     image: "/projects/rfp-pipeline.png",
+    diagram: `flowchart TD
+    SHARE["National Accounts file share"] --> SCAN["Scan Excel workbooks"]
+    SCAN --> FUZZY["Fuzzy-match to account + RFP"]
+    FUZZY --> STATS["Shipping-day statistics"]
+    STATS --> JSON["Audited JSON output"]
+    REFRESH["Fresh-refresh each run"] -.-> SCAN
+    FAIL["Fail-twice exclusion list"] -.-> SCAN`,
   },
   {
     name: "Freshkeep",
@@ -241,6 +274,14 @@ export const projectsContent: ProjectInfo[] = [
       "Waste-tracking analytics dashboard",
     ],
     repoPrivate: true,
+    diagram: `flowchart TD
+    SCAN["Scan receipt"] --> OCR["OCR line items"]
+    OCR --> TFIDF["TF-IDF match vs. 661 FoodKeeper entries"]
+    TFIDF --> API["FastAPI backend"]
+    API --> DB[("Supabase: RLS + JWT")]
+    DB --> COUNT["Expiry countdown"]
+    COUNT --> PUSH["Push reminders"]
+    DB --> DASH["Waste-tracking dashboard"]`,
   },
   {
     name: "Byte's Bank",
@@ -269,6 +310,13 @@ export const projectsContent: ProjectInfo[] = [
     repo: "https://github.com/rpmeyer3/Goose",
     live: "https://byte-bank-mauve.vercel.app",
     image: "/projects/bytes-bank.png",
+    diagram: `flowchart TD
+    PDF["Bank statement PDF"] --> PLUMB["pdfplumber parse"]
+    PLUMB --> ML["TF-IDF + Naive Bayes"]
+    ML --> CAT["10 spending categories"]
+    CAT --> DB[("Supabase: RLS")]
+    CAT --> GEM["Gemini advisor chat"]
+    GEM --> EL["ElevenLabs voice summary"]`,
   },
   {
     name: "Noise-Robust Image Segmentation System",
@@ -296,6 +344,14 @@ export const projectsContent: ProjectInfo[] = [
     repo: "https://github.com/rpmeyer3/Recognize",
     live: "https://pattern-delineation.vercel.app",
     image: "/projects/segmentation.png",
+    diagram: `flowchart TD
+    IMG["Input image"] --> API["FastAPI service"]
+    HF["Hugging Face model registry"] --> API
+    API --> NET["Attention U-Net + CBAM (31.5M params)"]
+    NET --> MASK["Segmentation mask"]
+    MASK --> HEAT["Confidence heatmap"]
+    HEAT --> DASH["Vercel dashboard"]
+    CUR["Curriculum-learning training"] -.-> NET`,
   },
   {
     name: "Filmhub",
@@ -323,6 +379,14 @@ export const projectsContent: ProjectInfo[] = [
     repo: "https://github.com/rpmeyer3/Filmhub",
     live: "https://film-hub-theta.vercel.app",
     image: "/projects/filmhub.png",
+    diagram: `flowchart TD
+    USER["User"] --> FE["Next.js + React SPA"]
+    FE --> API["Django REST API"]
+    API --> AUTH["OAuth 2.0 + JWT + RBAC"]
+    API --> DB[("PostgreSQL + triggers")]
+    FE --> PAY["Luhn-validated payments"]
+    CI["Docker CI/CD"] -.-> FE
+    CI -.-> API`,
   },
   {
     name: "Azure 3-Tier Secure Architecture",
@@ -347,6 +411,14 @@ export const projectsContent: ProjectInfo[] = [
     repo: "https://github.com/rpmeyer3/Mule",
     live: "https://three-tier-web-arch.vercel.app",
     image: "/projects/azure-3tier.png",
+    diagram: `flowchart TD
+    NET["Internet"] --> WAF["App Gateway WAF v2"]
+    WAF --> WEB["Web tier: Linux VMSS (2-5)"]
+    WEB --> APP["App tier"]
+    APP --> SQL[("Azure SQL (private endpoint)")]
+    ENTRA["Entra ID + Managed Identity"] -.-> WEB
+    ENTRA -.-> APP
+    TF["Terraform / AzureRM"] -.-> WAF`,
   },
   {
     name: "AI-PIP",
@@ -363,6 +435,12 @@ export const projectsContent: ProjectInfo[] = [
     repo: "https://github.com/rpmeyer3/Messina",
     live: "https://ai-pip.vercel.app",
     image: "/projects/ai-pip.png",
+    diagram: `flowchart TD
+    REQ["Request"] --> FUNC["Azure serverless function"]
+    FUNC --> INF["AI inference"]
+    INF --> RESP["Response"]
+    RESP --> VIZ["React + GSAP pipeline visualizer"]
+    TF["Reusable Terraform modules"] -.-> FUNC`,
   },
 ];
 

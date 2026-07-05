@@ -133,9 +133,6 @@ export default function CardFan({ items }: CardFanProps) {
     );
     if (!cardElements.length) return;
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
     const visibleMap = getVisibleMap(centerIndex);
     const previouslyVisible = prevVisible.current;
     const direction = directionRef.current;
@@ -206,10 +203,8 @@ export default function CardFan({ items }: CardFanProps) {
           y: `${targetY}rem`,
           rotation: targetRot,
           scale: targetScale,
-          // duration 0 under reduced motion = plain set; also lets the
-          // resize handler below re-apply base layout without animation.
-          duration: reduceMotion ? 0 : 0.5,
-          delay: reduceMotion ? 0 : delay,
+          duration: 0.5,
+          delay,
           ease: "elastic.out(1,.75)",
           // 'auto' overwrite only kills conflicts when a tween first
           // renders — a still-delayed tween from a fast pointer sweep
@@ -256,10 +251,7 @@ export default function CardFan({ items }: CardFanProps) {
           zIndex,
         };
 
-        if (reduceMotion) {
-          gsap.set(card, target);
-          onCardDone();
-        } else if (isFirstMount) {
+        if (isFirstMount) {
           gsap.set(card, {
             x: 0,
             y: `${12 * hMult}rem`,
@@ -306,11 +298,7 @@ export default function CardFan({ items }: CardFanProps) {
           rotation: direction === "right" ? -30 : 30,
           zIndex: 0,
         };
-        if (reduceMotion) {
-          gsap.set(card, exitState);
-        } else {
-          gsap.to(card, { ...exitState, duration: 0.4, ease: "power2.in" });
-        }
+        gsap.to(card, { ...exitState, duration: 0.4, ease: "power2.in" });
       } else if (isFirstMount) {
         gsap.set(card, { autoAlpha: 0, scale: 0.3, x: 0, y: 0, zIndex: 0 });
       }
@@ -318,16 +306,14 @@ export default function CardFan({ items }: CardFanProps) {
 
     prevVisible.current = new Set(visibleMap.keys());
 
-    // Resize re-applies the base layout for everyone — under reduced motion
-    // updateHoverLayout degenerates to gsap.set, so this is the only thing
-    // keeping positions in sync with the CSS breakpoints there.
+    // Resize re-applies the base layout, keeping positions in sync with the
+    // CSS breakpoints.
     const onResize = () => {
       if (!isAnimating.current) updateHoverLayout(activeSlot);
     };
     window.addEventListener("resize", onResize);
 
-    // Hover/focus lift — skipped under prefers-reduced-motion (CSS border
-    // hover on the card face still gives feedback).
+    // Hover/focus lift.
     let enterHandlers: { el: HTMLElement; handler: () => void }[] = [];
     const onMouseLeave = () => {
       if (isAnimating.current) {
@@ -341,30 +327,28 @@ export default function CardFan({ items }: CardFanProps) {
       }, 50);
     };
 
-    if (!reduceMotion) {
-      enterHandlers = visibleEntries.map(({ el, slot }) => {
-        const handler = () => {
-          if (isAnimating.current) {
-            pendingSlot = slot;
-            return;
-          }
-          if (leaveTimer) {
-            clearTimeout(leaveTimer);
-            leaveTimer = null;
-          }
-          if (activeSlot !== slot) {
-            activeSlot = slot;
-            updateHoverLayout(slot);
-          }
-        };
-        el.addEventListener("mouseenter", handler);
-        // Keyboard parity: focusing a card lifts it the same way hover does.
-        el.addEventListener("focus", handler);
-        return { el, handler };
-      });
-      container.addEventListener("mouseleave", onMouseLeave);
-      container.addEventListener("focusout", onMouseLeave);
-    }
+    enterHandlers = visibleEntries.map(({ el, slot }) => {
+      const handler = () => {
+        if (isAnimating.current) {
+          pendingSlot = slot;
+          return;
+        }
+        if (leaveTimer) {
+          clearTimeout(leaveTimer);
+          leaveTimer = null;
+        }
+        if (activeSlot !== slot) {
+          activeSlot = slot;
+          updateHoverLayout(slot);
+        }
+      };
+      el.addEventListener("mouseenter", handler);
+      // Keyboard parity: focusing a card lifts it the same way hover does.
+      el.addEventListener("focus", handler);
+      return { el, handler };
+    });
+    container.addEventListener("mouseleave", onMouseLeave);
+    container.addEventListener("focusout", onMouseLeave);
 
     return () => {
       enterHandlers.forEach(({ el, handler }) => {
@@ -383,7 +367,6 @@ export default function CardFan({ items }: CardFanProps) {
   // as its background, so the cut is invisible.
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>, slug: string) => {
     if (!SECTION_THEMES[slug]) return; // no photo — plain navigation
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
     if (expandingRef.current) return;
     expandingRef.current = true;

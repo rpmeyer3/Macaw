@@ -81,12 +81,6 @@
     opacity: 0.4;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .floating-path {
-    animation: none;
-    stroke-dasharray: none;
-  }
-}
 
 /* Animated Shiny Text (magicui, via 21st.dev). A glare band the width of
    --shiny-width pans across the text; the long dwell at each end keeps the
@@ -104,10 +98,5 @@
   30%,
   60% {
     background-position: calc(100% + var(--shiny-width)) 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .animate-shiny-text {
-    animation: none;
   }
 }
