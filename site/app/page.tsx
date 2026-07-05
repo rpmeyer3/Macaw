@@ -60,6 +60,17 @@ const SCENE_PHASES: Phase[] = [
   "outro",
 ];
 
+// "Advance on any key" must not swallow keyboard navigation: Tab (and
+// modifiers) are how a keyboard user reaches the skip button, and keydowns
+// originating on a button belong to that button (Enter/Space activate it).
+const shouldIgnoreKey = (e: KeyboardEvent) =>
+  e.key === "Tab" ||
+  e.key === "Shift" ||
+  e.key === "Alt" ||
+  e.key === "Control" ||
+  e.key === "Meta" ||
+  (e.target instanceof HTMLElement && e.target.closest("button") !== null);
+
 type UserLocation = {
   city: string;
   region: string;
@@ -93,6 +104,15 @@ export default function Page() {
     return () => clearTimeout(t);
   }, []);
 
+  // The intro is a 28x full-viewport zoom into a white flash — a vestibular
+  // trigger (WCAG 2.3.3). Reduced-motion visitors skip straight to the void.
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      skippingRef.current = true;
+      setPhase("void");
+    }
+  }, []);
+
   useEffect(() => {
     if (phase !== "marquee") return;
     const advance = () => {
@@ -100,11 +120,15 @@ export default function Page() {
       if (skippingRef.current) return;
       setPhase("transition");
     };
+    const advanceKey = (e: KeyboardEvent) => {
+      if (shouldIgnoreKey(e)) return;
+      advance();
+    };
     window.addEventListener("click", advance);
-    window.addEventListener("keydown", advance);
+    window.addEventListener("keydown", advanceKey);
     return () => {
       window.removeEventListener("click", advance);
-      window.removeEventListener("keydown", advance);
+      window.removeEventListener("keydown", advanceKey);
     };
   }, [phase]);
 
@@ -130,13 +154,18 @@ export default function Page() {
         return prev;
       });
     };
-    window.addEventListener("click", advance);
-    window.addEventListener("touchstart", advance, { passive: true });
-    window.addEventListener("keydown", advance);
+    const advanceKey = (e: KeyboardEvent) => {
+      if (shouldIgnoreKey(e)) return;
+      advance();
+    };
+    // pointerdown, not click+touchstart: a tap fires touchstart AND a
+    // synthesized click, which advanced the dialog two steps per tap on
+    // touch devices. pointerdown fires exactly once per tap or click.
+    window.addEventListener("pointerdown", advance);
+    window.addEventListener("keydown", advanceKey);
     return () => {
-      window.removeEventListener("click", advance);
-      window.removeEventListener("touchstart", advance);
-      window.removeEventListener("keydown", advance);
+      window.removeEventListener("pointerdown", advance);
+      window.removeEventListener("keydown", advanceKey);
     };
   }, [phase, dialogStep]);
 
@@ -145,13 +174,16 @@ export default function Page() {
     const advance = () => {
       setTrollStep((prev) => Math.min(prev + 1, 2));
     };
-    window.addEventListener("click", advance);
-    window.addEventListener("touchstart", advance, { passive: true });
-    window.addEventListener("keydown", advance);
+    const advanceKey = (e: KeyboardEvent) => {
+      if (shouldIgnoreKey(e)) return;
+      advance();
+    };
+    // pointerdown for the same one-event-per-tap reason as the globe phase.
+    window.addEventListener("pointerdown", advance);
+    window.addEventListener("keydown", advanceKey);
     return () => {
-      window.removeEventListener("click", advance);
-      window.removeEventListener("touchstart", advance);
-      window.removeEventListener("keydown", advance);
+      window.removeEventListener("pointerdown", advance);
+      window.removeEventListener("keydown", advanceKey);
     };
   }, [phase]);
 
@@ -234,11 +266,14 @@ export default function Page() {
 
   return (
     <main className="relative bg-black min-h-screen text-white overflow-hidden">
-      {phase === "marquee" && (
+      {(phase === "marquee" || phase === "transition" || phase === "globe") && (
         <button
           type="button"
           onClick={handleSkip}
           onTouchStart={handleSkip}
+          // Keep the tap/click on the skip button from also reaching the
+          // window-level advance handlers of the globe phase.
+          onPointerDown={(e) => e.nativeEvent.stopImmediatePropagation()}
           className="absolute top-4 right-4 md:top-6 md:right-6 z-50 px-3 py-2 font-mono text-[11px] md:text-xs uppercase tracking-[0.12em] text-white/60 hover:text-white active:text-white border border-white/20 hover:border-white/60 active:border-white rounded-sm transition-colors backdrop-blur-sm bg-black/30"
           aria-label="Skip the intro animation and go directly to the welcome page"
         >

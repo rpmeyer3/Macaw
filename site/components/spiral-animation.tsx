@@ -328,6 +328,12 @@ class AnimationController {
     this.startPostCompleteLoop();
   }
 
+  // Resume the forward intro from a given progress (0-1) — used when a
+  // resize rebuilds the controller mid-intro so it doesn't replay from 0.
+  public seek(t: number) {
+    this.timeline.progress(Math.min(Math.max(t, 0), 1));
+  }
+
   public reverse(duration: number, onReverseComplete?: () => void) {
     if (this.postCompleteRafId !== null) {
       cancelAnimationFrame(this.postCompleteRafId);
@@ -474,6 +480,8 @@ export function SpiralAnimation({
   const completedRef = useRef(false);
   const reverseRef = useRef(reverse);
   const pausedRef = useRef(paused);
+  // Forward progress of the last torn-down controller (see rebuild adoption).
+  const lastTimeRef = useRef(0);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -567,10 +575,15 @@ export function SpiralAnimation({
       );
     } else if (completedRef.current) {
       controller.skipToComplete();
+    } else if (lastTimeRef.current > 0) {
+      // Mid-forward rebuild: resume from where the torn-down controller
+      // was instead of replaying the whole intro from time 0.
+      controller.seek(lastTimeRef.current);
     }
     if (pausedRef.current) controller.setPaused(true);
 
     return () => {
+      lastTimeRef.current = animationRef.current?.time ?? 0;
       animationRef.current?.destroy();
       animationRef.current = null;
     };

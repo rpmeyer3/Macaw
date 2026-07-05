@@ -23,7 +23,9 @@ export const AnimatedShinyText: FC<AnimatedShinyTextProps> = ({
     <span
       style={{ "--shiny-width": `${shimmerWidth}px` } as CSSProperties}
       className={cn(
-        "text-white/40",
+        // white/60 keeps the base glyphs at >=4.5:1 on black (AA); /40 sat
+        // at ~3.7:1 and stayed dim whenever the shimmer was elsewhere.
+        "text-white/60",
         "animate-shiny-text bg-clip-text bg-no-repeat [background-position:0_0] [background-size:var(--shiny-width)_100%]",
         "bg-gradient-to-r from-transparent via-white via-50% to-transparent",
         className,

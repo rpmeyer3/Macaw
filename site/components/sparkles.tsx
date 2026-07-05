@@ -330,6 +330,7 @@ export function TitleSparkles({
   particleColor?: string;
 }) {
   const [effectiveDensity, setEffectiveDensity] = useState(particleDensity);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
     const apply = () => {
@@ -341,6 +342,25 @@ export function TitleSparkles({
     mq.addEventListener("change", apply);
     return () => mq.removeEventListener("change", apply);
   }, [particleDensity]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setReducedMotion(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  // Purely decorative infinite animation — drop it entirely under
+  // prefers-reduced-motion, keeping the div so the layout doesn't shift.
+  if (reducedMotion) {
+    return (
+      <div
+        className={cn("relative w-full h-8 mt-2", className)}
+        aria-hidden="true"
+      />
+    );
+  }
 
   return (
     <div

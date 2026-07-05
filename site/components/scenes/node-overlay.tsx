@@ -91,7 +91,15 @@ export function NodeOverlay({ slug }: { slug: NodeSlug }) {
         {slug === "contact" && <ContactOverlay />}
 
         <footer className="min-h-[40dvh] flex items-end justify-center pb-16 text-xs font-mono uppercase tracking-[0.08em] text-white/30">
-          ↓ keep scrolling, or press ↑ to return
+          <span>
+            ↓ keep scrolling, or{" "}
+            <Link
+              href="/hub"
+              className="text-white/60 underline underline-offset-4 hover:text-white transition-colors"
+            >
+              return to hub
+            </Link>
+          </span>
         </footer>
       </div>
     </div>
@@ -209,7 +217,9 @@ function ProjectsOverlay({ accent }: { accent: string }) {
       {projectsContent.map((p) => (
         <Section key={p.name}>
           <article>
-            <SectionLabel>project</SectionLabel>
+            <SectionLabel>
+              {p.period ? `project · ${p.period}` : "project"}
+            </SectionLabel>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
               {p.name}
             </h2>
@@ -218,23 +228,35 @@ function ProjectsOverlay({ accent }: { accent: string }) {
               {p.tagline}
             </p>
 
-            {p.image && (
-              <a
-                href={p.repo ?? p.live}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative mt-6 block aspect-[2/1] overflow-hidden rounded-xl border border-white/15 transition-colors hover:border-white/40"
-              >
-                <Image
-                  src={p.image}
-                  alt={`${p.name} repository card`}
-                  fill
-                  unoptimized
-                  sizes="(max-width: 768px) 100vw, 768px"
-                  className="object-cover"
-                />
-              </a>
-            )}
+            {p.image &&
+              (() => {
+                const href = p.repo ?? p.live;
+                const img = (
+                  <Image
+                    src={p.image}
+                    alt={`${p.name} repository card`}
+                    fill
+                    unoptimized
+                    sizes="(max-width: 768px) 100vw, 768px"
+                    className="object-cover"
+                  />
+                );
+                const frame =
+                  "relative mt-6 block aspect-[2/1] overflow-hidden rounded-xl border border-white/15";
+                // Private/internal projects have a card image but no link.
+                return href ? (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${frame} transition-colors hover:border-white/40`}
+                  >
+                    {img}
+                  </a>
+                ) : (
+                  <div className={frame}>{img}</div>
+                );
+              })()}
             <p className="mt-6 text-base md:text-lg text-white/80 leading-relaxed">
               {p.description}
             </p>

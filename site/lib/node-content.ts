@@ -151,6 +151,7 @@ export const projectsContent: ProjectInfo[] = [
       "Single self-contained HTML deliverable, no server required",
     ],
     repoPrivate: true,
+    image: "/projects/market-share-map.png",
   },
   {
     name: "LTL Pricing & Yield Analysis",
@@ -167,6 +168,7 @@ export const projectsContent: ProjectInfo[] = [
       "Reproducible analysis scripts with a strict local-only data boundary",
     ],
     repoPrivate: true,
+    image: "/projects/pricing-yield.png",
   },
   {
     name: "Distribution-Center Finder",
@@ -191,6 +193,7 @@ export const projectsContent: ProjectInfo[] = [
       "Per-ZIP caching plus a zipped distributable for internal sharing",
     ],
     repoPrivate: true,
+    image: "/projects/dc-finder.png",
   },
   {
     name: "RFP Data-Model Pipeline",
@@ -213,6 +216,7 @@ export const projectsContent: ProjectInfo[] = [
       "Fail-twice exclusion list for stable, repeatable runs",
     ],
     repoPrivate: true,
+    image: "/projects/rfp-pipeline.png",
   },
   {
     name: "Freshkeep",
