@@ -55,29 +55,27 @@
 }
 
 /* Background lines (void scene). pathLength=1 is set on each <path>, so dash
-   units are fractions of the path and the dash period is exactly 1. Mimics
-   the original framer version (dash grows 0.3 -> 1 while sliding along the
-   path) but loops seamlessly: the dash breathes 0.35 -> 1 -> 0.35 while the
-   offset drifts exactly two full periods (0 -> -2), so 100% renders
-   identically to 0% and the beam never stalls or snaps. */
+   units are fractions of the path and the dash period is exactly 1. The beam
+   slides along the path by animating ONLY stroke-dashoffset with a FIXED
+   dasharray. Animating dasharray itself (as an earlier version did) rebuilds
+   the dash pattern every frame, which browsers can't interpolate smoothly and
+   which renders as choppy/strobing lines. Offset drifts exactly one period
+   (0 -> -1) so 100% matches 0% and the loop is seamless; opacity pulses for
+   the "breathing" feel without touching the dash geometry. */
 .floating-path {
   stroke-dasharray: 0.35 0.65;
   animation: floating-path-drift 20s linear infinite;
 }
 @keyframes floating-path-drift {
   0% {
-    stroke-dasharray: 0.35 0.65;
     stroke-dashoffset: 0;
     opacity: 0.4;
   }
   50% {
-    stroke-dasharray: 1 0;
-    stroke-dashoffset: -1;
     opacity: 1;
   }
   100% {
-    stroke-dasharray: 0.35 0.65;
-    stroke-dashoffset: -2;
+    stroke-dashoffset: -1;
     opacity: 0.4;
   }
 }
